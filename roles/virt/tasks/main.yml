@@ -1,0 +1,11 @@
+- name: "Make sure pool exists"
+  community.libvirt.virt_pool:
+    state: present
+    name: nvme_disk_pool
+    xml: '{{ lookup("template", "pool/nvme.xml.j2") }}'
+
+- name: "VM present"
+  community.libvirt.virt:
+    status: running
+    xml: "{{ lookup('template', 'vm.xml.j2') }}"
+    autostart: yes
