@@ -1,0 +1,91 @@
+<domain type="kvm" xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
+    <name>qemu-vfio-user</name>
+
+    <metadata>
+        <libosinfo:libosinfo xmlns:libosinfo="http://libosinfo.org/xmlns/libvirt/domain/1.0">
+            <libosinfo:os id="http://ubuntu.com/ubuntu/20.04"/>
+        </libosinfo:libosinfo>
+    </metadata>
+
+    <memory unit="GiB">64</memory>
+    <vcpu cpuset="0-30" placement="static">31</vcpu>
+
+    <os>
+        <type arch="x86_64" machine="pc-q35-4.2">hvm</type>
+        <boot dev="hd"/>
+    </os>
+
+    <features>
+        <acpi/>
+        <apic/>
+    </features>
+
+    <cpu check="partial" mode="host-model"/>
+    <clock offset="utc">
+        <timer name="rtc" tickpolicy="catchup"/>
+        <timer name="pit" tickpolicy="delay"/>
+        <timer name="hpet" present="no"/>
+    </clock>
+
+    <on_poweroff>destroy</on_poweroff>
+    <on_reboot>restart</on_reboot>
+    <on_crash>destroy</on_crash>
+
+    <pm>
+        <suspend-to-mem enabled="no"/>
+        <suspend-to-disk enabled="no"/>
+    </pm>
+
+    <memoryBacking>
+        <hugepages>
+            <page size='2048' unit='KiB'/>
+        </hugepages>
+        <source type='memfd'/>
+        <access mode='shared'/>
+    </memoryBacking>
+
+    <!-- disk under test, needs a running nvmf target SPDK server process in the host -->
+    <qemu:commandline>
+        <qemu:arg value='-device'/>
+        <qemu:arg value='vfio-user-pci,socket=/var/run/cntrl,x-enable-migration=on'/>
+    </qemu:commandline>
+
+    <devices>
+        <!-- multiprocess qemu is the one that works -->
+        <emulator>/nutanix-src/qemu-orcl/build/qemu-system-x86_64</emulator>
+        
+        <!-- os image disk -->
+        <disk device="disk" type="file">
+            <driver name="qemu" type="qcow2"/>
+            <!-- remember to create this disk with qemu-img -->
+            <source file="/nutanix-nvme-bench/qemu-vfio-user.qcow"/>
+            <backingStore type="file">
+                <format type="qcow2"/>
+                <source file="/nutanix-nvme-bench/focal-server-cloudimg-amd64.img"/>
+                <backingStore/>
+            </backingStore>
+            <target bus="virtio" dev="sda"/>
+        </disk>
+        
+        <!-- ubuntu cloud image sillyness, gives a default password to the image -->
+        <disk device="disk" type="file">
+            <source file="/nutanix-nvme-bench/user-data.img"/>
+            <target bus="virtio" dev="sdb"/>
+        </disk>
+        
+        <!-- host/guest folder sharing, the target is a tag that has to be mounted in the guest                                                                                                                  # mount testlabel /opt/test -t 9p -o trans=virtio -->
+        <filesystem accessmode="mapped" type="mount">
+            <source dir="/nvme-fio/results"/>
+            <target dir="nvme_fio_results"/>
+        </filesystem>
+        
+        <!-- internet, needs libvirtd to be restarted while vm is running for iptables to reload -->
+        <interface type="network">
+            <source network="default"/>
+            <model type="virtio"/>
+        </interface>
+        
+        <!-- serial console to interact with virsh -->
+        <console type="pty"/>
+    </devices>
+</domain>

@@ -14,3 +14,6 @@ users:
 runcmd:
   - 'usermod -u 30553 jrolon'
   - 'groupmod -g 65534 nogroup'
+
+mounts:
+  - [ nvme_fio_results, /nvme-fio/results, 9p, trans=virtio, 0, 0 ]
