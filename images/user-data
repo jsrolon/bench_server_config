@@ -1,4 +1,7 @@
 #cloud-config
+
+## Create image out of this running "cloud-localds user-data.img user-data"
+
 password: ubuntu
 chpasswd: { expire: False }
 ssh_pwauth: True
