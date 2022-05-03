@@ -1,7 +1,16 @@
 #cloud-config
 
 ## Create image out of this running "cloud-localds user-data.img user-data"
+groups:
+  - nogroup
 
-password: ubuntu
-chpasswd: { expire: False }
-ssh_pwauth: True
+users:
+  - name: jrolon
+    primary_group: nogroup
+    lock_passwd: false
+    passwd: password
+
+# sync the uid and gid with the host
+runcmd:
+  - 'usermod -u 30553 jrolon'
+  - 'groupmod -g 65534 nogroup'
