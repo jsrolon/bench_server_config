@@ -5,15 +5,15 @@
     dest: /etc/ssh/sshd_config.d/allow_access_user.conf
     mode: '0644'
 
-# - name: Restart ssh daemon
-#   when: sshd_config_change.changed
-#   ansible.builtin.service:
-#     name: sshd
-#     state: restarted
+- name: Restart ssh daemon
+  when: sshd_config_change.changed
+  ansible.builtin.service:
+    name: sshd
+    state: restarted
 
-# - name: "Log out everyone except the current user"
-#   ansible.builtin.shell:
-#     cmd: "loginctl --no-legend list-users | grep -v ${USER} | cut -d' ' -f1 | xargs -I{} loginctl terminate-user {}"
+- name: "Log out everyone except the current user"
+  ansible.builtin.shell:
+    cmd: "loginctl --no-legend list-users | grep -v ${USER} | cut -d' ' -f1 | xargs -I{} loginctl terminate-user {}"
 
 - name: "Ensure the working folder exists and it is writeable"
   ansible.builtin.file:
@@ -49,15 +49,15 @@
 #     line: 'off'
 #     unsafe_writes: yes # this is needed since the /sys/ fs tree is _not_ a real device
 
-- name: "Repartition the disk"
-  community.general.parted:
-    device: "{{ nvme_device }}"
-    number: 1
-    state: present
+# - name: "Repartition the disk"
+#   community.general.parted:
+#     device: "{{ nvme_device }}"
+#     number: 1
+#     state: present
 
-- name: "Install jsrolon fork of fio-plot"
-  pip:
-    name: git+https://github.com/jsrolon/fio-plot.git
+# - name: "Install jsrolon fork of fio-plot"
+#   pip:
+#     name: git+https://github.com/jsrolon/fio-plot.git
 
 - name: "Checkout fio"
   ansible.builtin.git:

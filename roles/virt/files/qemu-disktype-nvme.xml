@@ -1,0 +1,92 @@
+<domain type='kvm'>
+    <name>qemu-disk-type-nvme</name>
+    <metadata>
+        <libosinfo:libosinfo xmlns:libosinfo="http://libosinfo.org/xmlns/libvirt/domain/1.0">
+            <libosinfo:os id="http://ubuntu.com/ubuntu/20.04"/>
+        </libosinfo:libosinfo>
+    </metadata>
+    <memory unit='GiB'>64</memory>
+    <vcpu placement='static' cpuset="0-30">31</vcpu>
+    <os>
+        <type arch='x86_64' machine='pc-q35-4.2'>hvm</type>
+        <boot dev='hd'/>
+    </os>
+    <features>
+        <acpi/>
+        <apic/>
+    </features>
+    <cpu mode='host-model' check='partial'/>
+    <clock offset='utc'>
+        <timer name='rtc' tickpolicy='catchup'/>
+        <timer name='pit' tickpolicy='delay'/>
+        <timer name='hpet' present='no'/>
+    </clock>
+    <on_poweroff>destroy</on_poweroff>
+    <on_reboot>restart</on_reboot>
+    <on_crash>destroy</on_crash>
+    <pm>
+        <suspend-to-mem enabled='no'/>
+        <suspend-to-disk enabled='no'/>
+    </pm>
+    
+    <devices>
+        <emulator>/usr/bin/qemu-system-x86_64</emulator>
+        
+        <!-- os image disk -->
+        <disk device="disk" type="file">
+            <driver name="qemu" type="qcow2"/>
+            <source file="/nutanix-nvme-bench/qemu-disk-type-nvme.qcow"/> <!-- remember to create this disk with qemu-img -->
+            <backingStore type="file">
+                <format type="qcow2"/>
+                <source file="/nutanix-nvme-bench/focal-server-cloudimg-amd64.img"/>
+                <backingStore/>
+            </backingStore>
+            <target dev="sda" bus="virtio"/>
+        </disk>
+
+        <!-- ubuntu cloud image sillyness, gives a default password to the image -->
+        <disk device="disk" type="file">
+            <source file="/nutanix-nvme-bench/user-data.img"/>
+            <target dev="sdb" bus="virtio"/>
+        </disk>
+
+        <!-- disk under test -->
+        <hostdev managed="yes" mode="subsystem" type="pci">
+            <source>
+                <address domain='0x0000' bus='0xbc' slot='0x00' function='0x0'/>
+            </source>
+            <boot order="1"/>
+            <rom bar="on" file="/etc/fake/boot.bin"/>
+        </hostdev>
+
+        <disk device='disk' type='nvme'>
+            <driver name='qemu' type='raw'/>
+            <source type='pci' managed='yes' namespace='1'>
+                <address domain='0x0000' bus='0xbc' slot='0x00' function='0x0'/>
+            </source>
+            <target dev='vde' bus='virtio'/>
+        </disk>
+        
+        <!-- host/guest folder sharing, the target is a tag that has to be mounted in the guest
+             # mount testlabel /opt/test -t 9p -o trans=virtio -->
+        <filesystem type='mount' accessmode='passthrough'>
+            <source dir='/nvme-fio'/>
+            <target dir='nvme_fio'/>
+        </filesystem>
+
+        <filesystem type='mount' accessmode='passthrough'>
+            <source dir='/nutanix-nvme-bench/src'/>
+            <target dir='nutanix_nvme_bench_src'/>
+        </filesystem>
+        
+        <!-- internet, needs libvirtd to be restarted while vm is running for iptables to reload -->
+        <interface type="network">
+            <source network="default"/>
+            <model type='virtio'/>
+        </interface>
+        
+        <!-- serial console to interact with virsh -->
+        <console type='pty'/>
+
+    </devices>
+</domain>
