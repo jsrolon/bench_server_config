@@ -1,5 +1,9 @@
 .idea/
 
+### Image files ###
+.img
+.qcow*
+
 # Created by https://www.toptal.com/developers/gitignore/api/windows,linux,macos,ansible
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,linux,macos,ansible
 
