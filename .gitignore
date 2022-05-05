@@ -1,5 +1,6 @@
 .idea/
 *.iml
+setcpulatency
 
 ### Image files ###
 .img
