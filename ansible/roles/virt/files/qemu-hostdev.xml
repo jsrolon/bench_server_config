@@ -5,8 +5,8 @@
             <libosinfo:os id="http://ubuntu.com/ubuntu/20.04"/>
         </libosinfo:libosinfo>
     </metadata>
-    <memory unit="GiB">64</memory>
-    <vcpu cpuset="0-30" placement="static">31</vcpu>
+    <memory unit="GiB">16</memory>
+    <vcpu cpuset="0-17" placement="static">18</vcpu>
     <os>
         <type arch="x86_64" machine="pc-q35-4.2">hvm</type>
         <boot dev="hd"/>
@@ -21,9 +21,6 @@
         <timer name="pit" tickpolicy="delay"/>
         <timer name="hpet" present="no"/>
     </clock>
-    <on_poweroff>destroy</on_poweroff>
-    <on_reboot>restart</on_reboot>
-    <on_crash>destroy</on_crash>
     <pm>
         <suspend-to-mem enabled="no"/>
         <suspend-to-disk enabled="no"/>
@@ -60,12 +57,8 @@
         
         <!-- host/guest folder sharing, the target is a tag that has to be mounted in the guest                                                                                                                  # mount testlabel /opt/test -t 9p -o trans=virtio -->
         <filesystem accessmode="passthrough" type="mount">
-            <source dir="/nvme-fio"/>
-            <target dir="nvme_fio"/>
-        </filesystem>
-        <filesystem accessmode="passthrough" type="mount">
-            <source dir="/nutanix-nvme-bench/src"/>
-            <target dir="nutanix_nvme_bench_src"/>
+            <source dir="/nvme-fio/results"/>
+            <target dir="nvme_fio_results"/>
         </filesystem>
         
         <!-- internet, needs libvirtd to be restarted while vm is running for iptables to reload -->
