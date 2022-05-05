@@ -7,7 +7,7 @@
         </libosinfo:libosinfo>
     </metadata>
 
-    <memory unit="GiB">32</memory>
+    <memory unit="GiB">16</memory>
     <vcpu cpuset="0-17" placement="static">18</vcpu>
 
     <os>
