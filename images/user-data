@@ -1,14 +1,16 @@
 #cloud-config
+password: password
+chpasswd: { expire: False }
 
 ## Create image out of this running "cloud-localds user-data.img user-data"
 groups:
   - nogroup
 
-users:
-  - name: jrolon
+system_info:
+  default_user:
+    name: jrolon
     primary_group: nogroup
-    lock_passwd: false
-    passwd: password
+    sudo: ALL=(ALL) NOPASSWD:ALL
 
 # sync the uid and gid with the host
 runcmd:
@@ -16,4 +18,8 @@ runcmd:
   - 'groupmod -g 65534 nogroup'
 
 mounts:
-  - [ nvme_fio_results, /nvme-fio/results, 9p, trans=virtio, 0, 0 ]
+  - [ "nvme_fio_results", "/nvme-fio/results", "9p", "trans=virtio", "0", "0" ]
+
+packages:
+  - build-essential
+  - meson

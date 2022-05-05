@@ -74,7 +74,7 @@
         </disk>
         
         <!-- host/guest folder sharing, the target is a tag that has to be mounted in the guest                                                                                                                  # mount testlabel /opt/test -t 9p -o trans=virtio -->
-        <filesystem accessmode="mapped" type="mount">
+        <filesystem accessmode="passthrough" type="mount">
             <source dir="/nvme-fio/results"/>
             <target dir="nvme_fio_results"/>
         </filesystem>
