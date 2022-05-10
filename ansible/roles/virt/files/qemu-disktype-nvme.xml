@@ -5,8 +5,8 @@
             <libosinfo:os id="http://ubuntu.com/ubuntu/20.04"/>
         </libosinfo:libosinfo>
     </metadata>
-    <memory unit="GiB">64</memory>
-    <vcpu cpuset="0-30" placement="static">31</vcpu>
+    <memory unit="GiB">16</memory>
+    <vcpu cpuset="0-17" placement="static">18</vcpu>
     <os>
         <type arch="x86_64" machine="pc-q35-4.2">hvm</type>
         <boot dev="hd"/>
@@ -21,9 +21,6 @@
         <timer name="pit" tickpolicy="delay"/>
         <timer name="hpet" present="no"/>
     </clock>
-    <on_poweroff>destroy</on_poweroff>
-    <on_reboot>restart</on_reboot>
-    <on_crash>destroy</on_crash>
     <pm>
         <suspend-to-mem enabled="no"/>
         <suspend-to-disk enabled="no"/>
@@ -33,10 +30,10 @@
         <!-- os image disk -->
         <disk device="disk" type="file">
             <driver name="qemu" type="qcow2"/>
-            <source file="/nutanix-nvme-bench/qemu-disk-type-nvme.qcow"/>
+            <source file="/nvme-fio/bench_server_config/images/qemu-disk-type-nvme.qcow"/>
             <backingStore type="file">
                 <format type="qcow2"/>
-                <source file="/nutanix-nvme-bench/focal-server-cloudimg-amd64.img"/>
+                <source file="/nvme-fio/bench_server_config/images/focal-server-cloudimg-amd64.img"/>
                 <backingStore/>
             </backingStore>
             <target bus="virtio" dev="sda"/>
@@ -44,7 +41,7 @@
 
         <!-- ubuntu cloud image sillyness, gives a default password to the image -->
         <disk device="disk" type="file">
-            <source file="/nutanix-nvme-bench/user-data.img"/>
+            <source file="/nvme-fio/bench_server_config/images/user-data.img"/>
             <target bus="virtio" dev="sdb"/>
         </disk>
 
@@ -59,8 +56,8 @@
 
         <!-- host/guest folder sharing, the target is a tag that has to be mounted in the guest -->
         <filesystem accessmode="passthrough" type="mount">
-            <source dir="/nvme-fio"/>
-            <target dir="nvme_fio"/>
+            <source dir="/nvme-fio/results"/>
+            <target dir="nvme_fio_results"/>
         </filesystem>
 
         <!-- internet, needs libvirtd to be restarted while vm is running for iptables to reload -->
