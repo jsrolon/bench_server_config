@@ -31,11 +31,11 @@
         <!-- os image disk -->
         <disk device="disk" type="file">
             <driver name="qemu" type="qcow2"/>
-            <source file="/nutanix-nvme-bench/qemu-hostdev.qcow"/>
+            <source file="/nvme-fio/bench_server_config/images/qemu-hostdev.qcow"/>
             <!-- remember to create this disk with qemu-img -->
             <backingStore type="file">
                 <format type="qcow2"/>
-                <source file="/nutanix-nvme-bench/focal-server-cloudimg-amd64.img"/>
+                <source file="/nvme-fio/bench_server_config/images/focal-server-cloudimg-amd64.img"/>
                 <backingStore/>
             </backingStore>
             <target bus="virtio" dev="sda"/>
@@ -43,7 +43,7 @@
         
         <!-- ubuntu cloud image sillyness, gives a default password to the image -->
         <disk device="disk" type="file">
-            <source file="/nutanix-nvme-bench/user-data.img"/>
+            <source file="/nvme-fio/bench_server_config/images/user-data.img"/>
             <target bus="virtio" dev="sdb"/>
         </disk>
         
