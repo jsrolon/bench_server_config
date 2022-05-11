@@ -47,7 +47,6 @@
 
         <!-- disk under test -->
         <disk device="disk" type="nvme">
-            <driver name="qemu" type="raw"/>
             <source managed="yes" namespace="1" type="pci">
                 <address bus="0xbc" domain="0x0000" function="0x0" slot="0x00"/>
             </source>
