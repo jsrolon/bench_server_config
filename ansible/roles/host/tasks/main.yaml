@@ -12,18 +12,28 @@
     state: restarted
 
 - name: "Log out everyone except the current user"
+  ignore_errors: true # In case there is no process
   ansible.builtin.shell:
-    cmd: "loginctl --no-legend list-users | grep -v ${USER} | cut -d' ' -f1 | xargs -I{} loginctl terminate-user {}"
+    cmd: "loginctl --no-legend list-users | grep -v {{ remote_user }} | cut -d' ' -f1 | xargs -I{} killall --user {} --wait"
 
-- name: "Ensure the working folder exists and it is writeable"
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: directory
-    mode: '0744'
+- name: Turn off nonessential services
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: stopped
   with_items:
-    - "{{ project_sources_dir }}"
-    - "{{ test_results_dir }}"
-    - "{{ setcpulatency_dir }}"
+    - containerd
+    - docker
+    - influxdb
+
+#- name: "Ensure the working folder exists and it is writeable"
+#  ansible.builtin.file:
+#    path: "{{ item }}"
+#    state: directory
+#    mode: '0744'
+#  with_items:
+#    - "{{ project_sources_dir }}"
+#    - "{{ test_results_dir }}"
+#    - "{{ setcpulatency_dir }}"
 
 - name: Copy source
   register: copied_setcpulatency
@@ -39,21 +49,18 @@
 - name: "Disable C-states using /dev/cpu_dma_latency"
   ansible.builtin.shell: "{{ setcpulatency_dir }}/setcpulatency {{ cpu_dma_latency_val }} &"
 
-# CPU cannot be set at a particular frequency: would need cpufreq_acpi driver which is somehow not
-# available in /lib/modules/$(uname -r)/kernel/drivers/cpufreq/
-# - name: "Disable P-states"
-#   ignore_errors: yes
-#   ansible.builtin.lineinfile:
-#     path: /sys/devices/system/cpu/intel_pstate/status
-#     regexp: '^\w+$'
-#     line: 'off'
-#     unsafe_writes: yes # this is needed since the /sys/ fs tree is _not_ a real device
+- name: "Set pstate driver to passive mode"
+  ansible.builtin.lineinfile:
+   path: /sys/devices/system/cpu/intel_pstate/status
+   regexp: '^\w+$'
+   line: 'passive'
+   unsafe_writes: yes # this is needed since the /sys/ fs tree is _not_ a real device
 
-# - name: "Repartition the disk"
-#   community.general.parted:
-#     device: "{{ nvme_device }}"
-#     number: 1
-#     state: present
+- name: "Set userspace scaling driver policy"
+  ansible.builtin.command: cpupower frequency-set --governor userspace
+
+- name: "Pin CPU to nominal frequency"
+  ansible.builtin.command: cpupower --cpu all frequency-set --freq 2593MHz
 
 # - name: "Install jsrolon fork of fio-plot"
 #   pip:
