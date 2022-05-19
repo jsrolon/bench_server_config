@@ -1,5 +1,5 @@
-<domain type="kvm">
-    <name>qemu-disk-type-nvme</name>
+<domain type="kvm" xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
+    <name>qemu-disktype-nvme</name>
     <metadata>
         <libosinfo:libosinfo xmlns:libosinfo="http://libosinfo.org/xmlns/libvirt/domain/1.0">
             <libosinfo:os id="http://ubuntu.com/ubuntu/20.04"/>
@@ -25,6 +25,15 @@
         <suspend-to-mem enabled="no"/>
         <suspend-to-disk enabled="no"/>
     </pm>
+
+    <!-- disk under test, requires vfio bounding (can be accomplished using spdk setup script), acl in /etc/libvirt/qemu.conf -->
+    <qemu:commandline>
+        <qemu:arg value='-drive'/>
+        <qemu:arg value='file=nvme://0000:bc:00.0/1,if=none,id=NVME1'/>
+        <qemu:arg value='-device'/>
+        <qemu:arg value='nvme,drive=NVME1,serial=nvme-1'/>
+    </qemu:commandline>
+
     <devices>
         <emulator>/usr/bin/qemu-system-x86_64</emulator>
         <!-- os image disk -->
@@ -43,14 +52,6 @@
         <disk device="disk" type="file">
             <source file="/nvme-fio/bench_server_config/images/user-data.img"/>
             <target bus="virtio" dev="sdb"/>
-        </disk>
-
-        <!-- disk under test -->
-        <disk device="disk" type="nvme">
-            <source managed="yes" namespace="1" type="pci">
-                <address bus="0xbc" domain="0x0000" function="0x0" slot="0x00"/>
-            </source>
-            <target bus="virtio" dev="vde"/>
         </disk>
 
         <!-- host/guest folder sharing, the target is a tag that has to be mounted in the guest -->
