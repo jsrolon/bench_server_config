@@ -1,3 +1,9 @@
+- name: "Ensure the ssh folder exists and it is writeable"
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config.d
+    state: directory
+    mode: '0744'
+
 - name: "Configure exclusive SSH access"
   register: sshd_config_change
   ansible.builtin.template:
@@ -35,19 +41,19 @@
 #    - "{{ test_results_dir }}"
 #    - "{{ setcpulatency_dir }}"
 
-- name: Copy source
-  register: copied_setcpulatency
-  ansible.builtin.copy:
-    src: files/setcpulatency.c
-    dest: "{{ setcpulatency_dir }}"
-
-- name: Compile setcpulatency
-  when: copied_setcpulatency.changed
-  ansible.builtin.command: 
-    cmd: gcc {{ setcpulatency_dir }}/setcpulatency.c -o {{ setcpulatency_dir }}/setcpulatency
+#- name: Copy source
+#  register: copied_setcpulatency
+#  ansible.builtin.copy:
+#    src: files/setcpulatency.c
+#    dest: "{{ setcpulatency_dir }}"
+#
+#- name: Compile setcpulatency
+#  when: copied_setcpulatency.changed
+#  ansible.builtin.command:
+#    cmd: gcc {{ setcpulatency_dir }}/setcpulatency.c -o {{ setcpulatency_dir }}/setcpulatency
 
 - name: "Disable C-states using /dev/cpu_dma_latency"
-  ansible.builtin.shell: "{{ setcpulatency_dir }}/setcpulatency {{ cpu_dma_latency_val }} &"
+  ansible.builtin.shell: "/nvme-fio/bench_server_config/setcpulatency 3 &"
 
 - name: "Set pstate driver to passive mode"
   ansible.builtin.lineinfile:
@@ -66,41 +72,41 @@
 #   pip:
 #     name: git+https://github.com/jsrolon/fio-plot.git
 
-- name: "Checkout fio"
-  ansible.builtin.git:
-    repo: 'https://github.com/axboe/fio.git'
-    dest: "{{ fio_source_dir }}"
-    version: fio-3.30
-    depth: 1
-    update: no
-
-- name: "Make fio"
-  ansible.builtin.command:
-    cmd: make
-    creates: "{{ fio_source_dir }}/fio"
-    chdir: "{{ fio_source_dir }}"
-
-- name: "Checkout spdk"
-  ansible.builtin.git:
-    repo: 'https://github.com/spdk/spdk.git'
-    dest: "{{ spdk_source_dir }}"
-    recursive: yes
-    version: v22.01
-    depth: 1
-    update: no
-
-- name: "Configure spdk with fio plugin"
-  register: spdk_reconfigured
-  ansible.builtin.command:
-    cmd: ./configure --with-fio={{ fio_source_dir }}
-    creates: "{{ spdk_source_dir }}/test/common/build_config.sh"
-    chdir: "{{ spdk_source_dir }}"
-
-- name: "Make spdk"
-  when: spdk_reconfigured.changed
-  ansible.builtin.command:
-    cmd: make
-    chdir: "{{ spdk_source_dir }}"
+#- name: "Checkout fio"
+#  ansible.builtin.git:
+#    repo: 'https://github.com/axboe/fio.git'
+#    dest: "{{ fio_source_dir }}"
+#    version: fio-3.30
+#    depth: 1
+#    update: no
+#
+#- name: "Make fio"
+#  ansible.builtin.command:
+#    cmd: make
+#    creates: "{{ fio_source_dir }}/fio"
+#    chdir: "{{ fio_source_dir }}"
+#
+#- name: "Checkout spdk"
+#  ansible.builtin.git:
+#    repo: 'https://github.com/spdk/spdk.git'
+#    dest: "{{ spdk_source_dir }}"
+#    recursive: yes
+#    version: v22.01
+#    depth: 1
+#    update: no
+#
+#- name: "Configure spdk with fio plugin"
+#  register: spdk_reconfigured
+#  ansible.builtin.command:
+#    cmd: ./configure --with-fio={{ fio_source_dir }}
+#    creates: "{{ spdk_source_dir }}/test/common/build_config.sh"
+#    chdir: "{{ spdk_source_dir }}"
+#
+#- name: "Make spdk"
+#  when: spdk_reconfigured.changed
+#  ansible.builtin.command:
+#    cmd: make
+#    chdir: "{{ spdk_source_dir }}"
 
 # - name: "Run bench_fio with the corresponding ioengine/threads/etc and envvars configurations"
 
@@ -112,15 +118,15 @@
 #     line: 'active'
 #     unsafe_writes: yes
 
-- name: "Enable C-states"
-  register: setcpulatency_kill_result
-  ansible.builtin.command: pkill -f 'setcpulatency'
-  failed_when: setcpulatency_kill_result.rc > 1
-
-# - name: "Revive stopped processes"
-
-- name: "Allow everyone to SSH again"
-  register: sshd_config_change
-  ansible.builtin.file:
-    path: /etc/ssh/sshd_config.d/allow_access_user.conf
-    state: absent
+#- name: "Enable C-states"
+#  register: setcpulatency_kill_result
+#  ansible.builtin.command: pkill -f 'setcpulatency'
+#  failed_when: setcpulatency_kill_result.rc > 1
+#
+## - name: "Revive stopped processes"
+#
+#- name: "Allow everyone to SSH again"
+#  register: sshd_config_change
+#  ansible.builtin.file:
+#    path: /etc/ssh/sshd_config.d/allow_access_user.conf
+#    state: absent
