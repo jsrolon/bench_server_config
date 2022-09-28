@@ -33,7 +33,6 @@
     </pm>
 
     <devices>
-        <!-- multiprocess qemu is the one that works -->
         <emulator>/usr/bin/qemu-system-x86_64</emulator>
         
         <!-- os image disk -->
