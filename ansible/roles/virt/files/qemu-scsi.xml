@@ -39,7 +39,7 @@
         <disk device="disk" type="file">
             <driver name="qemu" type="qcow2"/>
             <!-- remember to create this disk with qemu-img -->
-            <source file="/nvme-fio/bench_server_config/images/qemu-vfio-user.qcow"/>
+            <source file="/nvme-fio/bench_server_config/images/qemu-scsi.qcow"/>
             <backingStore type="file">
                 <format type="qcow2"/>
                 <source file="/nvme-fio/bench_server_config/images/focal-server-cloudimg-amd64.img"/>

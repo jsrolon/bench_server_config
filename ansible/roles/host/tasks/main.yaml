@@ -62,30 +62,13 @@
    line: 'passive'
    unsafe_writes: yes # this is needed since the /sys/ fs tree is _not_ a real device
 
-- name: "Set userspace scaling driver policy"
+- name: "Set CPU scaling driver policy to user-controlled"
   ansible.builtin.command: cpupower frequency-set --governor userspace
 
 - name: "Pin CPU to nominal frequency"
   ansible.builtin.command: cpupower --cpu all frequency-set --freq 2593MHz
 
-# - name: "Install jsrolon fork of fio-plot"
-#   pip:
-#     name: git+https://github.com/jsrolon/fio-plot.git
 
-#- name: "Checkout fio"
-#  ansible.builtin.git:
-#    repo: 'https://github.com/axboe/fio.git'
-#    dest: "{{ fio_source_dir }}"
-#    version: fio-3.30
-#    depth: 1
-#    update: no
-#
-#- name: "Make fio"
-#  ansible.builtin.command:
-#    cmd: make
-#    creates: "{{ fio_source_dir }}/fio"
-#    chdir: "{{ fio_source_dir }}"
-#
 #- name: "Checkout spdk"
 #  ansible.builtin.git:
 #    repo: 'https://github.com/spdk/spdk.git'
@@ -107,8 +90,6 @@
 #  ansible.builtin.command:
 #    cmd: make
 #    chdir: "{{ spdk_source_dir }}"
-
-# - name: "Run bench_fio with the corresponding ioengine/threads/etc and envvars configurations"
 
 # - name: "Enable P-states"
 #   ignore_errors: yes
