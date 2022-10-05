@@ -1,5 +1,5 @@
-- name: Assert all code dependencies
-  import_tasks: code_dependencies.yaml
+#- name: Assert all code dependencies
+#  import_tasks: dependencies.yaml
 
 - name: Make server have reproducible setup
   import_tasks: reproducible_setup.yaml

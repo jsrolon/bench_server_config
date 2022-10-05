@@ -1,18 +1,18 @@
+- name: "Checkout libvirt"
+  ansible.builtin.git:
+    repo: 'https://github.com/libvirt/libvirt.git'
+    dest: "{{ project_sources_dir }}/libvirt"
+    recursive: yes
+    version: v8.8.0 # Oct 3, 2022
+    depth: 1
+    update: no
+
 - name: "Checkout spdk"
   ansible.builtin.git:
     repo: 'https://github.com/spdk/spdk.git'
     dest: "{{ project_sources_dir }}/spdk"
     recursive: yes
     version: v22.09 # Sep 30, 2022
-    depth: 1
-    update: no
-
-- name: "Checkout libvfio-user"
-  ansible.builtin.git:
-    repo: 'https://github.com/nutanix/libvfio-user.git'
-    dest: "{{ project_sources_dir }}/libvfio-user"
-    recursive: yes
-    version: 388db3c4801b00f49befa3a2d0fb497fa90d58ce # Oct 5, 2022
     depth: 1
     update: no
 
@@ -25,7 +25,7 @@
     depth: 1
     update: no
 
-#- name: "Configure spdk with fio plugin"
+#- name: "Configure oracle-qemu to run as multiprocess"
 #  register: spdk_reconfigured
 #  ansible.builtin.command:
 #    cmd: ./configure --with-fio={{ fio_source_dir }}
