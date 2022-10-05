@@ -1,0 +1,12 @@
+ - name: "Enable P-states"
+   ignore_errors: yes
+   ansible.builtin.lineinfile:
+     path: /sys/devices/system/cpu/intel_pstate/status
+     regexp: '^\w+$'
+     line: 'active'
+     unsafe_writes: yes
+
+- name: "Enable C-states"
+  register: setcpulatency_kill_result
+  ansible.builtin.command: pkill -f 'setcpulatency'
+  failed_when: setcpulatency_kill_result.rc > 1

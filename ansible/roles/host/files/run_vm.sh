@@ -46,8 +46,5 @@ fi
 vm_running=$(virsh list --all | grep "${vm_name}")
 if [[ -z "${vm_running}" ]]; then
   echo "Creating VM"
-  virsh create "/nvme-fio/bench_server_config/ansible/roles/virt/files/${vm_name}.xml"
+  virsh create "/nvme-fio/bench_server_config/ansible/roles/host/files/libvirt_xml/${vm_name}.xml"
 fi
-
-echo "### Attaching console..."
-virsh console "${vm_name}"

@@ -1,0 +1,36 @@
+- name: "Ensure the working folder exists and it is writeable"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0744'
+  with_items:
+    - "{{ project_sources_dir }}"
+    - "{{ test_results_dir }}"
+    - "{{ setcpulatency_dir }}"
+
+- name: Copy source
+  register: copied_setcpulatency
+  ansible.builtin.copy:
+    src: files/setcpulatency.c
+    dest: "{{ setcpulatency_dir }}"
+
+- name: Compile setcpulatency
+  when: copied_setcpulatency.changed
+  ansible.builtin.command:
+    cmd: gcc {{ setcpulatency_dir }}/setcpulatency.c -o {{ setcpulatency_dir }}/setcpulatency
+
+- name: "Disable C-states using /dev/cpu_dma_latency"
+  ansible.builtin.shell: "/nvme-fio/bench_server_config/setcpulatency 3 &"
+
+- name: "Set pstate driver to passive mode"
+  ansible.builtin.lineinfile:
+   path: /sys/devices/system/cpu/intel_pstate/status
+   regexp: '^\w+$'
+   line: 'passive'
+   unsafe_writes: yes # this is needed since the /sys/ fs tree is _not_ a real device
+
+- name: "Set CPU scaling driver policy to user-controlled"
+  ansible.builtin.command: cpupower frequency-set --governor userspace
+
+- name: "Pin CPU to nominal frequency"
+  ansible.builtin.command: cpupower --cpu all frequency-set --freq 2593MHz

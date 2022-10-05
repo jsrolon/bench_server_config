@@ -7,3 +7,5 @@ The execution flow is meant to be:
 ```
 Ansible Host Provisioning -> VM Setup Script -> cloud-init VM Provisioning -> Benchmarking Script
 ```
+
+VMs are set up and benchmarking is run for them individually.

@@ -32,6 +32,7 @@
         <suspend-to-disk enabled="no"/>
     </pm>
 
+    <!-- we need to have the memory be backed by hugepages, according to https://github.com/nutanix/libvfio-user/blob/c08f20634159d977df8f551d07617a8c6b2fea64/docs/spdk.md#libvirt-->
     <memoryBacking>
         <hugepages>
             <page size='2048' unit='KiB'/>
