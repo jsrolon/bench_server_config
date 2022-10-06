@@ -16,13 +16,6 @@
     dest: /etc/ssh/sshd_config.d/allow_access_user.conf
     mode: '0644'
 
-- name: "Trigger give access back to everyone in 4 hours"
-  ansible.posix.at:
-    command: rm -rf /etc/ssh/sshd_config.d/allow_access_user.conf && systemctl restart sshd
-    count: 4
-    units: hours
-    unique: yes
-
 - name: Restart ssh daemon
   when: sshd_config_change.changed
   ansible.builtin.service:
