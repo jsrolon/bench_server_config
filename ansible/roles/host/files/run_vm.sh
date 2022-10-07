@@ -18,11 +18,9 @@ fi
 
 spdk_path="/nutanix-src/spdk"
 
-# ensure the vm os hdd has been created
 vm_os_image="/nvme-fio/bench_server_config/images/${vm_name}.qcow"
-if [[ ! -f "${vm_os_image}" ]]; then
-  qemu-img create -f qcow2 "${vm_os_image}" 10G
-fi
+rm -rf "${vm_os_image}"
+qemu-img create -f qcow2 "${vm_os_image}" 10G
 
 # the following is https://github.com/nutanix/libvfio-user/blob/master/docs/spdk.md
 if [[ "${vm_name}" == "vfio-user" ]]; then
@@ -56,5 +54,10 @@ fi
 # run the vm
 if ! virsh list --all --name | grep "${vm_name}"; then
   echo "### creating VM..."
+
+  images_path="/nvme-fio/bench_server_config/images"
+  rm -rf "${images_path}/user-data.img"
+  cloud-localds "${images_path}/user-data.img" "${images_path}/user-data"
+
   virsh create "/nvme-fio/bench_server_config/ansible/roles/host/files/libvirt_xml/qemu-${vm_name}.xml"
 fi

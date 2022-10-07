@@ -18,8 +18,8 @@ runcmd:
   - 'groupmod -g 65534 nogroup'
 
 mounts:
-  - [ "nvme_fio_results", "/nvme-fio/results", "9p", "trans=virtio", "0", "0" ]
   - [ "nutanix_src", "/nutanix-src", "9p", "trans=virtio", "0", "0" ]
+  - [ "nvme_fio", "/nvme-fio", "9p", "trans=virtio", "0", "0" ]
 
 packages:
   - build-essential

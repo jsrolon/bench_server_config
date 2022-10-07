@@ -16,10 +16,12 @@ fi
 spdk_path="/nutanix-src/spdk"
 
 # stop the spdk process
-pkill --signal INT --oldest --full 'nvmf_tgt'
+pkill --signal TERM --oldest --full 'nvmf_tgt'
 
 # destroy vm
-pkill --signal INT --oldest --full "qemu-${vm_name}"
+pkill --signal TERM --oldest --full "qemu-${vm_name}"
+sleep 3 # wait until it's dead
+virsh destroy "qemu-${vm_name}"
 
 # return nvme control to the kernel
 HUGEMEM=24000 PCI_ALLOWED="0000:bc:00.0" ${spdk_path}/scripts/setup.sh reset
