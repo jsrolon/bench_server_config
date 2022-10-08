@@ -18,6 +18,9 @@
     <features>
         <acpi/>
         <apic/>
+
+        <!-- needed for the viommu -->
+        <ioapic driver='qemu'/>
     </features>
 
     <cpu check="partial" mode="host-model"/>
@@ -87,7 +90,7 @@
             <model type="virtio"/>
         </interface>
 
-        <!-- we need to enable vfio inside the guest, so we need a virtual iommu-->
+        <!-- we need to enable vfio inside the guest, so we need a virtual iommu https://mcastelino.medium.com/how-to-use-vfio-to-assign-a-device-to-nested-vm-adb943dada4e -->
         <iommu model='intel'>
             <driver intremap='on' caching_mode='on' />
         </iommu>
