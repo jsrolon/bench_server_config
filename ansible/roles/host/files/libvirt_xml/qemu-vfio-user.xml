@@ -70,7 +70,7 @@
             <target bus="virtio" dev="sdb"/>
         </disk>
         
-        <!-- host/guest folder sharing, the target is a tag that has to be mounted in the guest                                                                                                                  # mount testlabel /opt/test -t 9p -o trans=virtio -->
+        <!-- host/guest folder sharing, the target is a tag that has to be mounted in -->
         <filesystem accessmode="passthrough" type="mount">
             <source dir="/nvme-fio"/>
             <target dir="nvme_fio"/>
@@ -86,6 +86,11 @@
             <source network="default"/>
             <model type="virtio"/>
         </interface>
+
+        <!-- we need to enable vfio inside the guest, so we need a virtual iommu-->
+        <iommu model='intel'>
+            <driver intremap='on' caching_mode='on' />
+        </iommu>
         
         <!-- serial console to interact with virsh -->
         <console type="pty"/>

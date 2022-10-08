@@ -18,7 +18,7 @@ fi
 
 spdk_path="/nutanix-src/spdk"
 
-vm_os_image="/nvme-fio/bench_server_config/images/${vm_name}.qcow"
+vm_os_image="/nvme-fio/bench_server_config/images/qemu-${vm_name}.qcow"
 rm -rf "${vm_os_image}"
 qemu-img create -f qcow2 "${vm_os_image}" 10G
 
