@@ -27,11 +27,11 @@ until virsh destroy "qemu-${vm_name}"; do
 done
 
 # had to wait until after qemu is done using the mountpoint
-if [[ "${vm_name}" == "scsi" ]]; then
+if [[ "${vm_name}" == "scsi" || "${vm_name}" == "dummy-nvme" ]]; then
   umount /dev/nvme2n1p1
 
   # clear nvme partition table
-  wipefs -a /dev/nvme2n1
+  sfdisk --delete /dev/nvme2n1
 fi
 
 # return nvme control to the kernel

@@ -57,7 +57,7 @@
         <!-- disk under test-->
         <disk type='file' device='disk'>
             <driver name='qemu' type='qcow2' queues='4' queue_size='256' />
-            <source file='/mnt/jrolon/nvme/scsi.qcow'/>
+            <source file='/mnt/jrolon/nvme/test.qcow'/>
             <target dev='vdd' bus='virtio'/>
         </disk>
         

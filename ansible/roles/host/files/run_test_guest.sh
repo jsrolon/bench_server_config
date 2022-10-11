@@ -7,6 +7,8 @@ if [[ "${EUID}" -ne 0 ]]
   exit 1
 fi
 
+dhclient # for the stupid no-internet thing with qemu (won't work if libvirtd on the host hasn't been restarted)
+apt update
 apt install -yqq libgflags-dev libsnappy-dev zlib1g-dev libbz2-dev liblz4-dev libzstd-dev libnuma-dev libssl-dev libaio-dev uuid-dev libjson-c-dev
 
 if [[ ! -f "/nutanix-src/dpdk-kmods/linux/igb_uio/igb_uio.ko" ]]; then
