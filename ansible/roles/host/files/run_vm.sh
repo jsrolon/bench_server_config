@@ -19,8 +19,9 @@ fi
 spdk_path="/nutanix-src/spdk"
 
 vm_os_image="/nvme-fio/bench_server_config/images/qemu-${vm_name}.qcow"
-rm -rf "${vm_os_image}"
-qemu-img create -f qcow2 "${vm_os_image}" 10G
+if [[ ! -f "${vm_os_image}" ]]; then
+  qemu-img create -f qcow2 "${vm_os_image}" 10G
+fi
 
 # the following is https://github.com/nutanix/libvfio-user/blob/master/docs/spdk.md
 if [[ "${vm_name}" == "vfio-user" ]]; then
@@ -55,6 +56,7 @@ fi
 if ! virsh list --all --name | grep "${vm_name}"; then
   echo "### creating VM..."
 
+  # Reload cloud-config settings
   images_path="/nvme-fio/bench_server_config/images"
   rm -rf "${images_path}/user-data.img"
   cloud-localds "${images_path}/user-data.img" "${images_path}/user-data"

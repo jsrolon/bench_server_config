@@ -25,7 +25,7 @@
 - name: "Log out everyone except the current user"
   ignore_errors: true # In case there is no process
   ansible.builtin.shell:
-    cmd: "loginctl --no-legend list-users | grep -v {{ remote_user }} | cut -d' ' -f1 | xargs -I{} killall --user {} --wait"
+    cmd: "loginctl --no-legend list-users | awk '!/{{ remote_user }}/ { print $2 }' | xargs -I{} killall --user {} --wait"
 
 - name: Turn off nonessential services
   ansible.builtin.service:

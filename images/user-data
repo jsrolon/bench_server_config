@@ -21,7 +21,19 @@ mounts:
   - [ "nutanix_src", "/nutanix-src", "9p", "trans=virtio", "0", "0" ]
   - [ "nvme_fio", "/nvme-fio", "9p", "trans=virtio", "0", "0" ]
 
+package_update: true
 packages:
   - build-essential
   - meson
   - make
+  - libgflags-dev
+  - libsnappy-dev
+  - zlib1g-dev
+  - libbz2-dev
+  - liblz4-dev
+  - libzstd-dev
+  - libnuma-dev
+  - libssl-dev
+  - libaio-dev
+  - uuid-dev
+  - libjson-c-dev

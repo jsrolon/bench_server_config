@@ -1,19 +1,30 @@
-<domain type="kvm">
+<domain type="kvm" xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
     <name>qemu-hostdev</name>
     <metadata>
         <libosinfo:libosinfo xmlns:libosinfo="http://libosinfo.org/xmlns/libvirt/domain/1.0">
             <libosinfo:os id="http://ubuntu.com/ubuntu/20.04"/>
         </libosinfo:libosinfo>
     </metadata>
+
+    <qemu:commandline>
+        <qemu:arg value='-bios'/>
+        <qemu:arg value='OVMF.fd'/>
+    </qemu:commandline>
+
     <memory unit="GiB">16</memory>
     <vcpu cpuset="0-17" placement="static">18</vcpu>
+
     <os>
-        <type arch="x86_64" machine="pc-q35-4.2">hvm</type>
+        <type arch="x86_64" machine="q35">hvm</type>
         <boot dev="hd"/>
     </os>
+
     <features>
         <acpi/>
         <apic/>
+
+        <!-- needed for the viommu -->
+        <ioapic driver='qemu'/>
     </features>
     <cpu check="partial" mode="host-model"/>
     <clock offset="utc">
@@ -25,6 +36,7 @@
         <suspend-to-mem enabled="no"/>
         <suspend-to-disk enabled="no"/>
     </pm>
+
     <devices>
         <emulator>/usr/bin/qemu-system-x86_64</emulator>
         
@@ -52,13 +64,18 @@
             <source>
                 <address bus="0xbc" domain="0x0000" function="0x0" slot="0x00"/>
             </source>
-            <driver name="vfio"/>
+            <driver name="vfio" />
         </hostdev>
         
-        <!-- host/guest folder sharing, the target is a tag that has to be mounted in the guest                                                                                                                  # mount testlabel /opt/test -t 9p -o trans=virtio -->
+        <!-- host/guest folder sharing, the target is a tag that has to be mounted in -->
         <filesystem accessmode="passthrough" type="mount">
-            <source dir="/nvme-fio/results"/>
-            <target dir="nvme_fio_results"/>
+            <source dir="/nvme-fio"/>
+            <target dir="nvme_fio"/>
+        </filesystem>
+
+        <filesystem accessmode="passthrough" type="mount">
+            <source dir="/nutanix-src"/>
+            <target dir="nutanix_src"/>
         </filesystem>
         
         <!-- internet, needs libvirtd to be restarted while vm is running for iptables to reload -->
@@ -66,6 +83,11 @@
             <source network="default"/>
             <model type="virtio"/>
         </interface>
+
+        <!-- we need to enable vfio inside the guest, so we need a virtual iommu https://mcastelino.medium.com/how-to-use-vfio-to-assign-a-device-to-nested-vm-adb943dada4e -->
+        <iommu model='intel'>
+            <driver intremap='on' caching_mode='on' iotlb="on" />
+        </iommu>
         
         <!-- serial console to interact with virsh -->
         <console type="pty"/>

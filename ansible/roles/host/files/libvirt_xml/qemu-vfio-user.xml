@@ -92,7 +92,7 @@
 
         <!-- we need to enable vfio inside the guest, so we need a virtual iommu https://mcastelino.medium.com/how-to-use-vfio-to-assign-a-device-to-nested-vm-adb943dada4e -->
         <iommu model='intel'>
-            <driver intremap='on' caching_mode='on' />
+            <driver intremap='on' caching_mode='on' iotlb="on" />
         </iommu>
         
         <!-- serial console to interact with virsh -->
