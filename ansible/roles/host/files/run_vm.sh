@@ -78,4 +78,7 @@ if ! virsh list --all --name | grep "${vm_name}"; then
   cloud-localds "${images_path}/user-data.img" "${images_path}/user-data"
 
   virsh create "/nvme-fio/bench_server_config/ansible/roles/host/files/libvirt_xml/qemu-${vm_name}.xml"
+
+  # required for internet access in the guests
+  systemctl restart libvirtd
 fi
