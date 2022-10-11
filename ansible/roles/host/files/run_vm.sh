@@ -50,6 +50,20 @@ if [[ "${vm_name}" == "vfio-user" ]]; then
   ${spdk_path}/scripts/rpc.py nvmf_create_subsystem nqn.2019-07.io.spdk:cnode0 -a -s SPDK0
   ${spdk_path}/scripts/rpc.py nvmf_subsystem_add_ns nqn.2019-07.io.spdk:cnode0 NVMe0n1
   ${spdk_path}/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-07.io.spdk:cnode0 -t VFIOUSER -a /var/run -s 0
+elif [[ "${vm_name}" == "scsi" ]]; then
+  # make sure we're using the kernel driver
+  PCI_ALLOWED="0000:bc:00.0" ${spdk_path}/scripts/setup.sh reset
+
+  # partition the disk + make it ext4
+  parted -a optimal /dev/nvme2n1 mkpart primary 0% 100%
+  mkfs -t ext4 /dev/nvme2n1p1
+
+  # mount nvme like a normal decent person
+  mount /dev/nvme2n1p1 /mnt/jrolon/nvme
+
+  # set up test disk
+  scsi_test_image="/mnt/jrolon/nvme/scsi.qcow"
+  qemu-img create -f qcow2 "${scsi_test_image}" 5G
 fi
 
 # run the vm

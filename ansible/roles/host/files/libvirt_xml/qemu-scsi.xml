@@ -57,14 +57,19 @@
         <!-- disk under test-->
         <disk type='file' device='disk'>
             <driver name='qemu' type='qcow2' queues='4' queue_size='256' />
-            <source file='/mnt/jrolon/nvme/qemu-scsi.qcow'/>
+            <source file='/mnt/jrolon/nvme/scsi.qcow'/>
             <target dev='vdd' bus='virtio'/>
         </disk>
         
-        <!-- host/guest folder sharing, the target is a tag that has to be mounted in the guest                                                                                                                  # mount testlabel /opt/test -t 9p -o trans=virtio -->
+        <!-- host/guest folder sharing, the target is a tag that has to be mounted in the guest # mount testlabel /opt/test -t 9p -o trans=virtio -->
         <filesystem accessmode="passthrough" type="mount">
-            <source dir="/nvme-fio/results"/>
-            <target dir="nvme_fio_results"/>
+            <source dir="/nvme-fio"/>
+            <target dir="nvme_fio"/>
+        </filesystem>
+
+        <filesystem accessmode="passthrough" type="mount">
+            <source dir="/nutanix-src"/>
+            <target dir="nutanix_src"/>
         </filesystem>
         
         <!-- internet, needs libvirtd to be restarted while vm is running for iptables to reload -->
