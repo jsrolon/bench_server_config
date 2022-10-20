@@ -32,14 +32,6 @@
         <suspend-to-disk enabled="no"/>
     </pm>
 
-    <memoryBacking>
-        <hugepages>
-            <page size='2048' unit='KiB'/>
-        </hugepages>
-        <source type='memfd'/>
-        <access mode='shared'/>
-    </memoryBacking>
-
     <!-- disk under test -->
     <qemu:commandline>
         <qemu:arg value='-drive'/>

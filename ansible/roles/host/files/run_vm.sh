@@ -53,9 +53,11 @@ if [[ "${vm_name}" == "vfio-user" ]]; then
 elif [[ "${vm_name}" == "scsi" || "${vm_name}" == "dummy-nvme" ]]; then
   # make sure we're using the kernel driver
   PCI_ALLOWED="0000:bc:00.0" ${spdk_path}/scripts/setup.sh reset
+  sleep 2
 
-  # partition the disk + make it ext4
-  parted -a optimal /dev/nvme2n1 mkpart primary 0% 100%
+  # give gpt partition label + partition the disk + make it ext4
+  parted --align optimal --script /dev/nvme2n1 mklabel gpt
+  parted --align optimal --script /dev/nvme2n1 mkpart primary 0% 100%
   sleep 2
   yes | mkfs -t ext4 /dev/nvme2n1p1
 
@@ -63,9 +65,9 @@ elif [[ "${vm_name}" == "scsi" || "${vm_name}" == "dummy-nvme" ]]; then
   mount /dev/nvme2n1p1 /mnt/jrolon/nvme
 
   # set up test disk
-  scsi_test_image="/mnt/jrolon/nvme/test.qcow"
-  rm -rf "${scsi_test_image}"
-  qemu-img create -f qcow2 "${scsi_test_image}" 50G
+  test_image="/mnt/jrolon/nvme/test.qcow"
+  rm -rf "${test_image}"
+  qemu-img create -f qcow2 "${test_image}" 325G # needs to be large or we get rocksdb segfaults
 fi
 
 # run the vm

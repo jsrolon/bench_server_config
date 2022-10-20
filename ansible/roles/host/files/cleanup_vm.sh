@@ -21,14 +21,18 @@ if [[ "${vm_name}" == "vfio-user" ]]; then
 fi
 
 # destroy vm
-until virsh destroy "qemu-${vm_name}"; do
-  pkill --signal TERM --oldest --full "qemu-${vm_name}"
-  sleep 3 # wait until it's dead
-done
+if virsh list --all --name | grep "${vm_name}"; then
+  until virsh destroy "qemu-${vm_name}"; do
+    pkill --signal TERM --oldest --full "qemu-${vm_name}"
+    sleep 3 # wait until it's dead
+  done
+fi
 
 # had to wait until after qemu is done using the mountpoint
 if [[ "${vm_name}" == "scsi" || "${vm_name}" == "dummy-nvme" ]]; then
-  umount /dev/nvme2n1p1
+  if mount -l | grep /dev/nvme2n1p1; then
+    umount /dev/nvme2n1p1
+  fi
 
   # clear nvme partition table
   sfdisk --delete /dev/nvme2n1
