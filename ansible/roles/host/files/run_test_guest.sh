@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
-set -e
+function finish() {
+    # create an empty file to let the host know that test has finished and we're ready to exit
+    touch "/nutanix-src/test_done"
+}
+
+# ensure the file is created so the host doesn't die in an infinite loop
+trap finish 0
 
 if [[ "${EUID}" -ne 0 ]]
   then echo "Please run as root"
@@ -9,7 +15,7 @@ fi
 
 dhclient # for the stupid no-internet thing with qemu (won't work if libvirtd on the host hasn't been restarted)
 apt update
-apt install -yqq libgflags-dev libsnappy-dev zlib1g-dev libbz2-dev liblz4-dev libzstd-dev libnuma-dev libssl-dev libaio-dev uuid-dev libjson-c-dev
+apt install -yqq libgflags-dev libsnappy-dev zlib1g-dev libbz2-dev liblz4-dev libzstd-dev libnuma-dev libssl-dev libaio-dev uuid-dev libjson-c-dev flex bison
 
 clear
 
@@ -35,7 +41,12 @@ clear
 # test script
 /nutanix-src/spdk/test/blobfs/rocksdb/rocksdb.sh
 
+# move results into /nvme-fio
 results_target_location="/nvme-fio/results/rocksdb/$(cat /etc/libvirt_domain_name)_$(date +%Y_%b_%d_%H%M%S)"
+echo "### Moving test results to ${results_target_location}..."
 mkdir -p "${results_target_location}"
 mv /nutanix-src/output/* "${results_target_location}"
+chown -R jrolon:nogroup "${results_target_location}" # needed for syncthing
 rm -rf /nutanix-src/output/
+
+finish

@@ -85,6 +85,13 @@ if ! virsh list --all --name | grep "${vm_name}"; then
 
   virsh create "/nvme-fio/bench_server_config/ansible/roles/host/files/libvirt_xml/qemu-${vm_name}.xml"
 
-  # required for internet access in the guests
+  # required for internet access in the guests, paired with running dhclient inside the guest
   systemctl restart libvirtd
+
+  # control has been given to the scripts inside the guest, we'll wait until it reports that it has finished
+  done_file_location="/nutanix-src/test_done"
+  while [[ ! -f "${done_file_location}" ]]; do
+    sleep 30
+  done
+  rm -f "${done_file_location}"
 fi

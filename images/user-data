@@ -1,14 +1,22 @@
+Content-Type: multipart/mixed; boundary="//"
+MIME-Version: 1.0
+
+--//
+Content-Type: text/cloud-config; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename="cloud-config.txt"
+
 #cloud-config
+## Create image out of this running "cloud-localds user-data.img user-data"
 
 bootcmd:
   - echo "___LIBVIRT_DOMAIN_NAME___" > /etc/libvirt_domain_name
-  - dhclient
 
 ssh_pwauth: True
 password: password
 chpasswd: { expire: False }
 
-## Create image out of this running "cloud-localds user-data.img user-data"
 groups:
   - nogroup
 
@@ -27,19 +35,13 @@ mounts:
   - [ "nutanix_src", "/nutanix-src", "9p", "trans=virtio", "0", "0" ]
   - [ "nvme_fio", "/nvme-fio", "9p", "trans=virtio", "0", "0" ]
 
-package_update: true
-packages:
-  - build-essential
-  - meson
-  - make
-  - libgflags-dev
-  - libsnappy-dev
-  - zlib1g-dev
-  - libbz2-dev
-  - liblz4-dev
-  - libzstd-dev
-  - libnuma-dev
-  - libssl-dev
-  - libaio-dev
-  - uuid-dev
-  - libjson-c-dev
+--//
+Content-Type: text/x-shellscript-per-boot; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename="script.sh"
+
+#!/bin/bash
+/nvme-fio/bench_server_config/ansible/roles/host/files/run_test_guest.sh
+
+--//
