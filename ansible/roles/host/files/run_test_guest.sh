@@ -35,4 +35,7 @@ clear
 # test script
 /nutanix-src/spdk/test/blobfs/rocksdb/rocksdb.sh
 
-# TODO: automatically move the output to a convenient location
+results_target_location="/nvme-fio/results/rocksdb/$(cat /etc/libvirt_domain_name)_$(date +%Y_%b_%d_%H%M%S)"
+mkdir -p "${results_target_location}"
+mv /nutanix-src/output/* "${results_target_location}"
+rm -rf /nutanix-src/output/

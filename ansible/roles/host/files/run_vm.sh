@@ -25,6 +25,9 @@ fi
 
 # the following is https://github.com/nutanix/libvfio-user/blob/master/docs/spdk.md
 if [[ "${vm_name}" == "vfio-user" ]]; then
+  # we need spdk to have been built correctly
+  # ${spdk_path}/configure --with-vfio-user
+
   # give control of the nvme to vfio instead of the kernel
   # assign 24GB of hugepages
   HUGEMEM=24000 PCI_ALLOWED="0000:bc:00.0" ${spdk_path}/scripts/setup.sh
@@ -77,7 +80,8 @@ if ! virsh list --all --name | grep "${vm_name}"; then
   # Reload cloud-config settings
   images_path="/nvme-fio/bench_server_config/images"
   rm -rf "${images_path}/user-data.img"
-  cloud-localds "${images_path}/user-data.img" "${images_path}/user-data"
+  # ugly sed-replacement cause we need to get the vm name inside somehow
+  cloud-localds "${images_path}/user-data.img" <(sed "s/___LIBVIRT_DOMAIN_NAME___/${vm_name}/" "${images_path}/user-data")
 
   virsh create "/nvme-fio/bench_server_config/ansible/roles/host/files/libvirt_xml/qemu-${vm_name}.xml"
 

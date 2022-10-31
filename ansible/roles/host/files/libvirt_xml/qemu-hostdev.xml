@@ -6,11 +6,6 @@
         </libosinfo:libosinfo>
     </metadata>
 
-    <qemu:commandline>
-        <qemu:arg value='-bios'/>
-        <qemu:arg value='OVMF.fd'/>
-    </qemu:commandline>
-
     <memory unit="GiB">16</memory>
     <vcpu cpuset="0-17" placement="static">18</vcpu>
 
@@ -84,11 +79,6 @@
             <model type="virtio"/>
         </interface>
 
-        <!-- we need to enable vfio inside the guest, so we need a virtual iommu https://mcastelino.medium.com/how-to-use-vfio-to-assign-a-device-to-nested-vm-adb943dada4e -->
-        <iommu model='intel'>
-            <driver intremap='on' caching_mode='on' iotlb="on" />
-        </iommu>
-        
         <!-- serial console to interact with virsh -->
         <console type="pty"/>
     </devices>

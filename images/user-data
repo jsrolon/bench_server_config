@@ -1,5 +1,9 @@
 #cloud-config
 
+bootcmd:
+  - echo "___LIBVIRT_DOMAIN_NAME___" > /etc/libvirt_domain_name
+  - dhclient
+
 ssh_pwauth: True
 password: password
 chpasswd: { expire: False }
