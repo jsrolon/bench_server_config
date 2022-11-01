@@ -17,11 +17,13 @@ spdk_path="/nutanix-src/spdk"
 
 if [[ "${vm_name}" == "vfio-user" ]]; then
   # stop the spdk process
+  echo "pkilling spdk target"
   pkill --signal TERM --oldest --full 'nvmf_tgt'
 fi
 
 # destroy vm
 if virsh list --all --name | grep "${vm_name}"; then
+  echo "pkilling vm"
   until virsh destroy "qemu-${vm_name}"; do
     pkill --signal TERM --oldest --full "qemu-${vm_name}"
     sleep 3 # wait until it's dead

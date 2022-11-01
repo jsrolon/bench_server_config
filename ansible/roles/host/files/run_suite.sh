@@ -8,6 +8,7 @@ if [[ "${EUID}" -ne 0 ]]
 fi
 
 for guest_name in hostdev vfio-user dummy-nvme; do
+  echo "### Currently running ${guest_name}"
   ./run_vm.sh "${guest_name}"
   ./cleanup_vm.sh "${guest_name}"
 done
