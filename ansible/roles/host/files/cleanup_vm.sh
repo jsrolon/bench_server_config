@@ -21,13 +21,15 @@ if [[ "${vm_name}" == "vfio-user" ]]; then
   pkill --signal TERM --oldest --full 'nvmf_tgt'
 fi
 
-# destroy vm
-if virsh list --all --name | grep "${vm_name}"; then
-  echo "pkilling vm"
-  until virsh destroy "qemu-${vm_name}"; do
-    pkill --signal TERM --oldest --full "qemu-${vm_name}"
-    sleep 3 # wait until it's dead
-  done
+if [[ "${vm_name}" != "baremetal" ]]; then
+  # destroy vm
+  if virsh list --all --name | grep "${vm_name}"; then
+    echo "pkilling vm"
+    until virsh destroy "qemu-${vm_name}"; do
+      pkill --signal TERM --oldest --full "qemu-${vm_name}"
+      sleep 3 # wait until it's dead
+    done
+  fi
 fi
 
 # had to wait until after qemu is done using the mountpoint

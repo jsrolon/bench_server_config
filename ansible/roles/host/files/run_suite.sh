@@ -7,7 +7,7 @@ if [[ "${EUID}" -ne 0 ]]
   exit 1
 fi
 
-for guest_name in hostdev vfio-user dummy-nvme; do
+for guest_name in baremetal hostdev vfio-user dummy-nvme; do
   echo "### Currently running ${guest_name}"
   ./run_vm.sh "${guest_name}"
   ./cleanup_vm.sh "${guest_name}"

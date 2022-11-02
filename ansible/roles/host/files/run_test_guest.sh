@@ -15,14 +15,13 @@ fi
 
 dhclient # for the stupid no-internet thing with qemu (won't work if libvirtd on the host hasn't been restarted)
 apt update
-apt install -yqq libgflags-dev libsnappy-dev zlib1g-dev libbz2-dev liblz4-dev libzstd-dev libnuma-dev libssl-dev libaio-dev uuid-dev libjson-c-dev flex bison
+apt install -yqq build-essential libgflags-dev libsnappy-dev zlib1g-dev libbz2-dev liblz4-dev libzstd-dev libnuma-dev libssl-dev libaio-dev uuid-dev libjson-c-dev flex bison
 
 clear
 
-if [[ ! -f "/nutanix-src/dpdk-kmods/linux/igb_uio/igb_uio.ko" ]]; then
-  cd "/nutanix-src/dpdk-kmods/linux/igb_uio/"
-  make clean && make
-fi
+pushd "/nutanix-src/dpdk-kmods/linux/igb_uio/"
+make clean && make
+popd
 
 clear
 

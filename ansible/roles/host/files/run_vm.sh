@@ -19,7 +19,7 @@ fi
 spdk_path="/nutanix-src/spdk"
 
 vm_os_image="/nvme-fio/bench_server_config/images/qemu-${vm_name}.qcow"
-if [[ ! -f "${vm_os_image}" ]]; then
+if [[ "${vm_name}" != "baremetal" && ! -f "${vm_os_image}" ]]; then
   qemu-img create -f qcow2 "${vm_os_image}" 10G
 fi
 
@@ -73,25 +73,40 @@ elif [[ "${vm_name}" == "scsi" || "${vm_name}" == "dummy-nvme" ]]; then
   qemu-img create -f qcow2 "${test_image}" 325G # needs to be large or we get rocksdb segfaults
 fi
 
-# run the vm
-if ! virsh list --all --name | grep "${vm_name}"; then
-  echo "### creating VM..."
+if [[ "${vm_name}" != "baremetal" ]]; then
+  # run the vm
+  if ! virsh list --all --name | grep "${vm_name}"; then
+    echo "### creating VM..."
 
-  # Reload cloud-config settings
-  images_path="/nvme-fio/bench_server_config/images"
-  rm -rf "${images_path}/user-data.img"
-  # ugly sed-replacement cause we need to get the vm name inside somehow
-  cloud-localds "${images_path}/user-data.img" <(sed "s/___LIBVIRT_DOMAIN_NAME___/${vm_name}/" "${images_path}/user-data")
+    # Reload cloud-config settings
+    images_path="/nvme-fio/bench_server_config/images"
+    rm -rf "${images_path}/user-data.img"
+    # ugly sed-replacement cause we need to get the vm name inside somehow
+    cloud-localds "${images_path}/user-data.img" <(sed "s/___LIBVIRT_DOMAIN_NAME___/${vm_name}/" "${images_path}/user-data")
 
-  virsh create "/nvme-fio/bench_server_config/ansible/roles/host/files/libvirt_xml/qemu-${vm_name}.xml"
+    virsh create "/nvme-fio/bench_server_config/ansible/roles/host/files/libvirt_xml/qemu-${vm_name}.xml"
 
-  # required for internet access in the guests, paired with running dhclient inside the guest
-  systemctl restart libvirtd
+    # required for internet access in the guests, paired with running dhclient inside the guest
+    systemctl restart libvirtd
 
-  # control has been given to the scripts inside the guest, we'll wait until it reports that it has finished
-  done_file_location="/nutanix-src/test_done"
-  while [[ ! -f "${done_file_location}" ]]; do
-    sleep 30
-  done
-  rm -f "${done_file_location}"
+    # control has been given to the scripts inside the guest, we'll wait until it reports that it has finished
+    done_file_location="/nutanix-src/test_done"
+    while [[ ! -f "${done_file_location}" ]]; do
+      sleep 30
+    done
+    rm -f "${done_file_location}"
+  fi
+else
+  # apparently json config file doesnt generate correctly if this doesnt run first
+  PCI_ALLOWED="0000:bc:00.0" ${spdk_path}/scripts/setup.sh
+
+  BAREMETAL=1 ${spdk_path}/test/blobfs/rocksdb/rocksdb.sh
+
+  # move results into /nvme-fio
+  results_target_location="/nvme-fio/results/rocksdb/baremetal_$(date +%Y_%b_%d_%H%M%S)"
+  echo "### Moving test results to ${results_target_location}..."
+  mkdir -p "${results_target_location}"
+  mv /nutanix-src/output/* "${results_target_location}"
+  chown -R jrolon:nogroup "${results_target_location}" # needed for syncthing
+  rm -rf /nutanix-src/output/
 fi
