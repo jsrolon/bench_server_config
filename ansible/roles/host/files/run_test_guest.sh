@@ -41,7 +41,7 @@ clear
 /nutanix-src/spdk/test/blobfs/rocksdb/rocksdb.sh
 
 # move results into /nvme-fio
-results_target_location="/nvme-fio/results/rocksdb/$(cat /etc/libvirt_domain_name)_$(date +%Y_%b_%d_%H%M%S)"
+results_target_location="/nvme-fio/results/rocksdb/$(cat /etc/libvirt_domain_name)_$(date --utc +%Y_%b_%d_%H%M%S)"
 echo "### Moving test results to ${results_target_location}..."
 mkdir -p "${results_target_location}"
 mv /nutanix-src/output/* "${results_target_location}"

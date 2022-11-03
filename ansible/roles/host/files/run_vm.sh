@@ -16,6 +16,9 @@ if [[ -z "${vm_name}" ]]; then
   exit 1
 fi
 
+# drop all caches just to make sure
+sync; echo 3 > /proc/sys/vm/drop_caches
+
 spdk_path="/nutanix-src/spdk"
 
 vm_os_image="/nvme-fio/bench_server_config/images/qemu-${vm_name}.qcow"
@@ -103,7 +106,7 @@ else
   BAREMETAL=1 ${spdk_path}/test/blobfs/rocksdb/rocksdb.sh
 
   # move results into /nvme-fio
-  results_target_location="/nvme-fio/results/rocksdb/baremetal_$(date +%Y_%b_%d_%H%M%S)"
+  results_target_location="/nvme-fio/results/rocksdb/baremetal_$(date --utc +%Y_%b_%d_%H%M%S)"
   echo "### Moving test results to ${results_target_location}..."
   mkdir -p "${results_target_location}"
   mv /nutanix-src/output/* "${results_target_location}"
