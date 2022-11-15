@@ -35,7 +35,7 @@
     <!-- disk under test -->
     <qemu:commandline>
         <qemu:arg value='-drive'/>
-        <qemu:arg value='file=/mnt/jrolon/nvme/test.qcow,if=none,id=D22'/>
+        <qemu:arg value='file=/mnt/jrolon/nvme/test.qcow,if=none,id=D22,cache=writethrough'/>
         <qemu:arg value='-device'/>
         <qemu:arg value='nvme,drive=D22,serial=1234'/>
     </qemu:commandline>
