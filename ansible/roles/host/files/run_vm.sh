@@ -16,10 +16,26 @@ if [[ -z "${vm_name}" ]]; then
   exit 1
 fi
 
+# we need to verify that we're running using the same versions of everything always
+spdk_path="/nutanix-src/spdk"
+spdk_req_version="v22.01.x"
+spdk_req_origin="git@github.com:jsrolon/spdk.git"
+spdk_version=$(git -C "${spdk_path}" rev-parse --abbrev-ref HEAD)
+spdk_origin=$(git -C "${spdk_path}" remote get-url origin)
+if [[ "${spdk_version}" != "${spdk_req_version}" || "${spdk_origin}" != "${spdk_req_origin}" ]]; then
+  echo "Current SPDK ${spdk_version} from ${spdk_origin} is not expected, required is ${spdk_req_version} from ${spdk_req_origin}"
+  exit 2
+fi
+
+qemu_req_version="QEMU emulator version 6.2.0 (Debian 1:6.2+dfsg-2ubuntu8~20.04.sav0)"
+qemu_ver=$(qemu-system-x86_64 --version | head -n1)
+if [[ "${qemu_ver}" != "${qemu_req_version}" ]]; then
+  echo "Current qemu-system-x86_64 ${qemu_ver} is not expected, required is ${qemu_req_version}"
+  exit 2
+fi
+
 # drop all caches just to make sure
 sync; echo 3 > /proc/sys/vm/drop_caches
-
-spdk_path="/nutanix-src/spdk"
 
 vm_os_image="/nvme-fio/bench_server_config/images/qemu-${vm_name}.qcow"
 if [[ "${vm_name}" != "baremetal" && ! -f "${vm_os_image}" ]]; then
