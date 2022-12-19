@@ -42,6 +42,8 @@ Content-Transfer-Encoding: 7bit
 Content-Disposition: attachment; filename="script.sh"
 
 #!/bin/bash
-/nvme-fio/bench_server_config/ansible/roles/host/files/run_test_guest.sh
+if ___RUN_TEST_GUEST___; then
+    /nvme-fio/bench_server_config/ansible/roles/host/files/run_test_guest.sh
+fi
 
 --//
