@@ -16,6 +16,8 @@ if [[ -z "${vm_name}" ]]; then
   exit 1
 fi
 
+run_test_guest="${2:-true}"
+
 # we need to verify that we're running using the same versions of everything always
 spdk_path="/nutanix-src/spdk"
 spdk_req_version="v22.01.x"
@@ -100,8 +102,9 @@ if [[ "${vm_name}" != "baremetal" ]]; then
     # Reload cloud-config settings
     images_path="/nvme-fio/bench_server_config/images"
     rm -rf "${images_path}/user-data.img"
-    # ugly sed-replacement cause we need to get the vm name inside somehow
+    # ugly sed-replacement cause we need to modify the user data
     cloud-localds "${images_path}/user-data.img" <(sed "s/___LIBVIRT_DOMAIN_NAME___/${vm_name}/" "${images_path}/user-data")
+    cloud-localds "${images_path}/user-data.img" <(sed "s/___RUN_TEST_GUEST___/${run_test_guest}/" "${images_path}/user-data")
 
     virsh create "/nvme-fio/bench_server_config/ansible/roles/host/files/libvirt_xml/qemu-${vm_name}.xml"
 
