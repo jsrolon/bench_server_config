@@ -33,6 +33,8 @@ if [[ -z ${vm_name} ]]; then
   exit 1
 fi
 
+run_test_guest="${2:-true}"
+
 # we need to verify that we're running using the same versions of everything always
 spdk_path="/nutanix-src/spdk"
 spdk_req_version="v22.01.x"
