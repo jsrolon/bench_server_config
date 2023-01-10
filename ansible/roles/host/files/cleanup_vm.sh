@@ -15,10 +15,16 @@ fi
 
 spdk_path="/nutanix-src/spdk"
 
+clear_partition_table() {
+  printf "Clearing partition table..."
+  sfdisk --delete /dev/nvme2n1 || true
+  echo "Done."
+}
+
 if [[ "${vm_name}" == "vfio-user" ]]; then
   # stop the spdk process
   echo "pkilling spdk target"
-  pkill --signal TERM --oldest --full 'nvmf_tgt'
+  pkill --signal TERM --oldest --full 'nvmf_tgt' || true
 fi
 
 if [[ "${vm_name}" != "baremetal" ]]; then
@@ -38,9 +44,13 @@ if [[ "${vm_name}" == "scsi" || "${vm_name}" == "dummy-nvme" ]]; then
     umount /dev/nvme2n1p1
   fi
 
-  # clear nvme partition table
-  sfdisk --delete /dev/nvme2n1
+  clear_partition_table
 fi
 
 # return nvme control to the kernel
 HUGEMEM=24000 PCI_ALLOWED="0000:bc:00.0" ${spdk_path}/scripts/setup.sh reset
+
+if [[ "${vm_name}" == "vfio-user" ]]; then
+  sleep 3
+  clear_partition_table
+fi

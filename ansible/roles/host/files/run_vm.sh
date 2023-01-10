@@ -10,13 +10,28 @@ if [[ "${EUID}" -ne 0 ]]
   exit 1
 fi
 
-vm_name="${1}"
-if [[ -z "${vm_name}" ]]; then
-  echo "Need vm name"
+run_test_guest="true"
+while getopts "n:dt" opt; do
+  case $opt in
+    n)
+      vm_name=${OPTARG}
+      ;;
+    d)
+      run_test_guest="false"
+      ;;
+    t)
+      tracing_string="-e all"
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      ;;
+  esac
+done
+
+if [[ -z ${vm_name} ]]; then
+  echo "Missing vm name -n"
   exit 1
 fi
-
-run_test_guest="${2:-true}"
 
 # we need to verify that we're running using the same versions of everything always
 spdk_path="/nutanix-src/spdk"
@@ -24,7 +39,7 @@ spdk_req_version="v22.01.x"
 spdk_req_origin="git@github.com:jsrolon/spdk.git"
 spdk_version=$(git -C "${spdk_path}" rev-parse --abbrev-ref HEAD)
 spdk_origin=$(git -C "${spdk_path}" remote get-url origin)
-if [[ "${spdk_version}" != "${spdk_req_version}" || "${spdk_origin}" != "${spdk_req_origin}" ]]; then
+if ${run_test_guest} && [[ "${spdk_version}" != "${spdk_req_version}" || "${spdk_origin}" != "${spdk_req_origin}" ]]; then
   echo "Current SPDK ${spdk_version} from ${spdk_origin} is not expected, required is ${spdk_req_version} from ${spdk_req_origin}"
   exit 2
 fi
@@ -60,7 +75,7 @@ if [[ "${vm_name}" == "vfio-user" ]]; then
 
   # run the nvmeof target process (the one that listens to i/o requests) and pin it to 4 cores
   LD_LIBRARY_PATH="${spdk_path}/build/lib:${spdk_path}/dpdk/build/lib"  \
-    ${spdk_path}/build/bin/nvmf_tgt -m '[32, 33, 34, 35]' &
+    ${spdk_path}/build/bin/nvmf_tgt ${tracing_string} -m '[32, 33, 34, 35]' &
 
   echo "### waiting until the spdk process is ready..."
   until ${spdk_path}/scripts/rpc.py framework_wait_init > /dev/null; do
@@ -103,20 +118,21 @@ if [[ "${vm_name}" != "baremetal" ]]; then
     images_path="/nvme-fio/bench_server_config/images"
     rm -rf "${images_path}/user-data.img"
     # ugly sed-replacement cause we need to modify the user data
-    cloud-localds "${images_path}/user-data.img" <(sed "s/___LIBVIRT_DOMAIN_NAME___/${vm_name}/" "${images_path}/user-data")
-    cloud-localds "${images_path}/user-data.img" <(sed "s/___RUN_TEST_GUEST___/${run_test_guest}/" "${images_path}/user-data")
+    cloud-localds "${images_path}/user-data.img" <(sed -e "s/___LIBVIRT_DOMAIN_NAME___/${vm_name}/" -e "s/___RUN_TEST_GUEST___/${run_test_guest}/" "${images_path}/user-data")
 
     virsh create "/nvme-fio/bench_server_config/ansible/roles/host/files/libvirt_xml/qemu-${vm_name}.xml"
 
     # required for internet access in the guests, paired with running dhclient inside the guest
     systemctl restart libvirtd
 
-    # control has been given to the scripts inside the guest, we'll wait until it reports that it has finished
-    done_file_location="/nutanix-src/test_done"
-    while [[ ! -f "${done_file_location}" ]]; do
-      sleep 30
-    done
-    rm -f "${done_file_location}"
+    if ${run_test_guest}; then
+      # control has been given to the scripts inside the guest, we'll wait until it reports that it has finished
+      done_file_location="/nutanix-src/test_done"
+      while [[ ! -f "${done_file_location}" ]]; do
+        sleep 30
+      done
+      rm -f "${done_file_location}"
+    fi
   fi
 else
   # apparently json config file doesnt generate correctly if this doesnt run first
