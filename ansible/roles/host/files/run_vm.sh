@@ -29,11 +29,9 @@ while getopts "n:dt" opt; do
 done
 
 if [[ -z ${vm_name} ]]; then
-  echo "Missing vm name -n"
+  echo "-n VM_NAME -d To disable running tests inside guest -t For enabling tracing"
   exit 1
 fi
-
-run_test_guest="${2:-true}"
 
 # we need to verify that we're running using the same versions of everything always
 spdk_path="/nutanix-src/spdk"
@@ -78,6 +76,7 @@ if [[ "${vm_name}" == "vfio-user" ]]; then
   # run the nvmeof target process (the one that listens to i/o requests) and pin it to 4 cores
   LD_LIBRARY_PATH="${spdk_path}/build/lib:${spdk_path}/dpdk/build/lib"  \
     ${spdk_path}/build/bin/nvmf_tgt ${tracing_string} -m '[32, 33, 34, 35]' &
+  nvmf_tgt_pid="$!"
 
   echo "### waiting until the spdk process is ready..."
   until ${spdk_path}/scripts/rpc.py framework_wait_init > /dev/null; do
@@ -91,6 +90,12 @@ if [[ "${vm_name}" == "vfio-user" ]]; then
   ${spdk_path}/scripts/rpc.py nvmf_create_subsystem nqn.2019-07.io.spdk:cnode0 -a -s SPDK0
   ${spdk_path}/scripts/rpc.py nvmf_subsystem_add_ns nqn.2019-07.io.spdk:cnode0 NVMe0n1
   ${spdk_path}/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-07.io.spdk:cnode0 -t VFIOUSER -a /var/run -s 0
+
+  if [[ ! -z "${tracing_string}" ]]; then
+    record_trace_path="/tmp/spdk_nvmf_record.trace.$(date +%s)"
+    ${spdk_path}/build/bin/spdk_trace_record -q -s nvmf -p "${nvmf_tgt_pid}" -f "${record_trace_path}"
+    echo "Writing trace to ${record_trace_path}"
+  fi
 elif [[ "${vm_name}" == "scsi" || "${vm_name}" == "dummy-nvme" ]]; then
   # make sure we're using the kernel driver
   PCI_ALLOWED="0000:bc:00.0" ${spdk_path}/scripts/setup.sh reset

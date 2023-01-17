@@ -37,15 +37,19 @@ HUGEMEM=5120 PCI_ALLOWED="0000:$(lspci | awk '/Non-Volatile/ { print $1 }')" DRI
 rm -rf /nutanix-src/output
 clear
 
-# test script
-/nutanix-src/spdk/test/blobfs/rocksdb/rocksdb.sh
 
-# move results into /nvme-fio
-results_target_location="/nvme-fio/results/rocksdb/$(cat /etc/libvirt_domain_name)_$(date --utc +%Y_%m_%d_%H%M%S)"
-echo "### Moving test results to ${results_target_location}..."
-mkdir -p "${results_target_location}"
-mv /nutanix-src/output/* "${results_target_location}"
-chown -R jrolon:nogroup "${results_target_location}" # needed for syncthing
-rm -rf /nutanix-src/output/
+run_test_guest=$(cat /etc/run_test_guest)
+if "${run_test_guest}"; then
+  # test script
+  /nutanix-src/spdk/test/blobfs/rocksdb/rocksdb.sh
 
-finish
+  # move results into /nvme-fio
+  results_target_location="/nvme-fio/results/rocksdb/$(cat /etc/libvirt_domain_name)_$(date --utc +%Y_%m_%d_%H%M%S)"
+  echo "### Moving test results to ${results_target_location}..."
+  mkdir -p "${results_target_location}"
+  mv /nutanix-src/output/* "${results_target_location}"
+  chown -R jrolon:nogroup "${results_target_location}" # needed for syncthing
+  rm -rf /nutanix-src/output/
+
+  finish
+fi

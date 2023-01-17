@@ -12,6 +12,7 @@ Content-Disposition: attachment; filename="cloud-config.txt"
 
 bootcmd:
   - echo "___LIBVIRT_DOMAIN_NAME___" > /etc/libvirt_domain_name
+  - echo "___RUN_TEST_GUEST___" > /etc/run_test_guest
 
 ssh_pwauth: True
 password: password
@@ -42,8 +43,6 @@ Content-Transfer-Encoding: 7bit
 Content-Disposition: attachment; filename="script.sh"
 
 #!/bin/bash
-if ___RUN_TEST_GUEST___; then
-    /nvme-fio/bench_server_config/ansible/roles/host/files/run_test_guest.sh
-fi
+/nvme-fio/bench_server_config/ansible/roles/host/files/run_test_guest.sh
 
 --//
