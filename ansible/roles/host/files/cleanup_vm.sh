@@ -13,11 +13,14 @@ if [[ -z "${vm_name}" ]]; then
   exit 1
 fi
 
+target_nvme_trid="0000:bb:00.0"
+target_nvme_dev_path="/dev/nvme1n1"
+
 spdk_path="/nutanix-src/spdk"
 
 clear_partition_table() {
   printf "Clearing partition table..."
-  sfdisk --delete /dev/nvme2n1 || true
+  sfdisk --delete "${target_nvme_dev_path}" || true
   echo "Done."
 }
 
@@ -40,15 +43,15 @@ fi
 
 # had to wait until after qemu is done using the mountpoint
 if [[ "${vm_name}" == "scsi" || "${vm_name}" == "dummy-nvme" ]]; then
-  if mount -l | grep /dev/nvme2n1p1; then
-    umount /dev/nvme2n1p1
+  if mount -l | grep "${target_nvme_dev_path}"p1; then
+    umount "${target_nvme_dev_path}"p1
   fi
 
   clear_partition_table
 fi
 
 # return nvme control to the kernel
-HUGEMEM=24000 PCI_ALLOWED="0000:bc:00.0" ${spdk_path}/scripts/setup.sh reset
+HUGEMEM=24000 PCI_ALLOWED="${target_nvme_trid}" ${spdk_path}/scripts/setup.sh reset
 
 if [[ "${vm_name}" == "vfio-user" ]]; then
   sleep 3

@@ -33,6 +33,9 @@ if [[ -z ${vm_name} ]]; then
   exit 1
 fi
 
+target_nvme_trid="0000:bb:00.0"
+target_nvme_dev_path="/dev/nvme1n1"
+
 # we need to verify that we're running using the same versions of everything always
 spdk_path="/nutanix-src/spdk"
 spdk_req_version="v22.01.x"
@@ -44,7 +47,7 @@ if ${run_test_guest} && [[ "${spdk_version}" != "${spdk_req_version}" || "${spdk
   exit 2
 fi
 
-qemu_req_version="QEMU emulator version 6.2.0 (Debian 1:6.2+dfsg-2ubuntu8~20.04.sav0)"
+qemu_req_version="QEMU emulator version 6.2.0 (Debian 1:6.2+dfsg-2ubuntu6.6)"
 qemu_ver=$(qemu-system-x86_64 --version | head -n1)
 if [[ "${qemu_ver}" != "${qemu_req_version}" ]]; then
   echo "Current qemu-system-x86_64 ${qemu_ver} is not expected, required is ${qemu_req_version}"
@@ -66,7 +69,7 @@ if [[ "${vm_name}" == "vfio-user" ]]; then
 
   # give control of the nvme to vfio instead of the kernel
   # assign 24GB of hugepages
-  HUGEMEM=24000 PCI_ALLOWED="0000:bc:00.0" ${spdk_path}/scripts/setup.sh
+  HUGEMEM=24000 PCI_ALLOWED="${target_nvme_trid}" ${spdk_path}/scripts/setup.sh
 
   echo "### waiting for 12000 hugepages of 2048KiB to be allocated..."
   until [[ $(awk '/^HugePages_Total:/ {print $2}' /proc/meminfo) -eq "12000" ]]; do
@@ -86,7 +89,7 @@ if [[ "${vm_name}" == "vfio-user" ]]; then
   # remote procedure calls to the nvmf process to configure the bdev to talk to the physical nvme
   rm -f /var/run/{cntrl,bar0}
   ${spdk_path}/scripts/rpc.py nvmf_create_transport -t VFIOUSER
-  ${spdk_path}/scripts/rpc.py bdev_nvme_attach_controller -b NVMe0 -t PCIe -a "0000:bc:00.0"
+  ${spdk_path}/scripts/rpc.py bdev_nvme_attach_controller -b NVMe0 -t PCIe -a "${target_nvme_trid}"
   ${spdk_path}/scripts/rpc.py nvmf_create_subsystem nqn.2019-07.io.spdk:cnode0 -a -s SPDK0
   ${spdk_path}/scripts/rpc.py nvmf_subsystem_add_ns nqn.2019-07.io.spdk:cnode0 NVMe0n1
   ${spdk_path}/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-07.io.spdk:cnode0 -t VFIOUSER -a /var/run -s 0
@@ -98,17 +101,17 @@ if [[ "${vm_name}" == "vfio-user" ]]; then
   fi
 elif [[ "${vm_name}" == "scsi" || "${vm_name}" == "dummy-nvme" ]]; then
   # make sure we're using the kernel driver
-  PCI_ALLOWED="0000:bc:00.0" ${spdk_path}/scripts/setup.sh reset
+  PCI_ALLOWED="${target_nvme_trid}" ${spdk_path}/scripts/setup.sh reset
   sleep 2
 
   # give gpt partition label + partition the disk + make it ext4
-  parted --align optimal --script /dev/nvme2n1 mklabel gpt
-  parted --align optimal --script /dev/nvme2n1 mkpart primary 0% 100%
+  parted --align optimal --script "${target_nvme_dev_path}" mklabel gpt
+  parted --align optimal --script "${target_nvme_dev_path}" mkpart primary 0% 100%
   sleep 2
-  yes | mkfs -t ext4 /dev/nvme2n1p1
+  yes | mkfs -t ext4 "${target_nvme_dev_path}"
 
   # mount nvme like a normal decent person
-  mount /dev/nvme2n1p1 /mnt/jrolon/nvme
+  mount "${target_nvme_dev_path}" /mnt/jrolon/nvme
 
   # set up test disk
   test_image="/mnt/jrolon/nvme/test.qcow"
@@ -143,7 +146,7 @@ if [[ "${vm_name}" != "baremetal" ]]; then
   fi
 else
   # apparently json config file doesnt generate correctly if this doesnt run first
-  PCI_ALLOWED="0000:bc:00.0" ${spdk_path}/scripts/setup.sh
+  PCI_ALLOWED="${target_nvme_trid}" ${spdk_path}/scripts/setup.sh
 
   BAREMETAL=1 ${spdk_path}/test/blobfs/rocksdb/rocksdb.sh
 
