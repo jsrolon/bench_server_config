@@ -94,11 +94,11 @@ if [[ "${vm_name}" == "vfio-user" ]]; then
   ${spdk_path}/scripts/rpc.py nvmf_subsystem_add_ns nqn.2019-07.io.spdk:cnode0 NVMe0n1
   ${spdk_path}/scripts/rpc.py nvmf_subsystem_add_listener nqn.2019-07.io.spdk:cnode0 -t VFIOUSER -a /var/run -s 0
 
-  if [[ ! -z "${tracing_string}" ]]; then
-    record_trace_path="/tmp/spdk_nvmf_record.trace.$(date +%s)"
-    ${spdk_path}/build/bin/spdk_trace_record -q -s nvmf -p "${nvmf_tgt_pid}" -f "${record_trace_path}"
-    echo "Writing trace to ${record_trace_path}"
-  fi
+  # if [[ ! -z "${tracing_string}" ]]; then
+  #   record_trace_path="/tmp/spdk_nvmf_record.trace.$(date +%s)"
+  #   ${spdk_path}/build/bin/spdk_trace_record -q -s nvmf -p "${nvmf_tgt_pid}" -f "${record_trace_path}"
+  #   echo "Writing trace to ${record_trace_path}"
+  # fi
 elif [[ "${vm_name}" == "scsi" || "${vm_name}" == "dummy-nvme" ]]; then
   # make sure we're using the kernel driver
   PCI_ALLOWED="${target_nvme_trid}" ${spdk_path}/scripts/setup.sh reset
