@@ -12,7 +12,7 @@
     repo: 'https://github.com/jsrolon/spdk.git'
     dest: "{{ project_sources_dir }}/spdk"
     recursive: yes
-    version: v22.01
+    version: v22.01.x
     depth: 1
     update: no
 

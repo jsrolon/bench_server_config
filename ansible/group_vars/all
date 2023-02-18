@@ -1,9 +1,9 @@
 nvme_device: /dev/nvme2n1
-setcpulatency_dir: /nutanix-nvme-bench/tools/setcpulatency
+setcpulatency_dir: /nvme-fio/setcpulatency
 
-project_sources_dir: /nutanix-nvme-bench/src/
-test_results_dir: /nutanix-nvme-bench/results/
-fio_source_dir: /nutanix-nvme-bench/src/fio
-spdk_source_dir: /nutanix-nvme-bench/src/spdk
+project_sources_dir: /nutanix-src/
+test_results_dir: /nvme-fio/results/
+fio_source_dir: /nutanix-src/fio
+spdk_source_dir: /nutanix-src/spdk
 
 cpu_dma_latency_val: 0
