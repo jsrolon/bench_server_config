@@ -42,7 +42,7 @@
             <source file="/nvme-fio/bench_server_config/images/qemu-disk-type-nvme.qcow"/>
             <backingStore type="file">
                 <format type="qcow2"/>
-                <source file="/nvme-fio/bench_server_config/images/jammy-server-cloudimg-amd64.img"/>
+                <source file="/nvme-fio/bench_server_config/images/focal-server-cloudimg-amd64.img"/>
                 <backingStore/>
             </backingStore>
             <target bus="virtio" dev="sda"/>
