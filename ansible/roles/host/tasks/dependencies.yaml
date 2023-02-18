@@ -9,19 +9,28 @@
 
 - name: "Checkout spdk"
   ansible.builtin.git:
-    repo: 'https://github.com/spdk/spdk.git'
+    repo: 'https://github.com/jsrolon/spdk.git'
     dest: "{{ project_sources_dir }}/spdk"
     recursive: yes
-    version: v22.09 # Sep 30, 2022
+    version: v22.01
     depth: 1
     update: no
 
 - name: "Checkout oracle-qemu"
   ansible.builtin.git:
-    repo: 'https://github.com/oracle/qemu.git'
+    repo: 'https://github.com/jsrolon/qemu.git'
     dest: "{{ project_sources_dir }}/qemu-orcl"
     recursive: yes
-    version: 46bb039c31e92ae84cf7fe1f64119c1a78e0d101 # Jun 3, 2022
+    version: vfio-user-rfc3.1
+    depth: 1
+    update: no
+
+- name: "Checkout fio"
+  ansible.builtin.git:
+    repo: 'https://github.com/axboe/fio.git'
+    dest: "{{ project_sources_dir }}/fio"
+    recursive: yes
+    version: fio-3.30
     depth: 1
     update: no
 
