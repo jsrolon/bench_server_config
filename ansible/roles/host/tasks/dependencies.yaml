@@ -1,11 +1,11 @@
-- name: "Checkout libvirt"
-  ansible.builtin.git:
-    repo: 'https://github.com/libvirt/libvirt.git'
-    dest: "{{ project_sources_dir }}/libvirt"
-    recursive: yes
-    version: v8.8.0 # Oct 3, 2022
-    depth: 1
-    update: no
+# - name: "Checkout libvirt"
+#   ansible.builtin.git:
+#     repo: 'https://github.com/libvirt/libvirt.git'
+#     dest: "{{ project_sources_dir }}/libvirt"
+#     recursive: yes
+#     version: v8.8.0 # Oct 3, 2022
+#     depth: 1
+#     update: no
 
 - name: "Checkout spdk"
   ansible.builtin.git:
@@ -31,6 +31,14 @@
     dest: "{{ project_sources_dir }}/fio"
     recursive: yes
     version: fio-3.30
+    depth: 1
+    update: no
+
+- name: "Checkout dpdk-kmods"
+  ansible.builtin.git:
+    repo: 'https://dpdk.org/git/dpdk-kmods'
+    dest: "{{ project_sources_dir }}/dpdk-kmods"
+    recursive: yes
     depth: 1
     update: no
 
