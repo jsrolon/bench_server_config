@@ -33,8 +33,8 @@ if [[ -z ${vm_name} ]]; then
   exit 1
 fi
 
-target_nvme_trid="0000:bb:00.0"
-target_nvme_dev_path="/dev/nvme1n1"
+target_nvme_trid="0000:bc:00.0"
+target_nvme_dev_path="/dev/nvme2n1"
 
 # we need to verify that we're running using the same versions of everything always
 spdk_path="/nutanix-src/spdk"
