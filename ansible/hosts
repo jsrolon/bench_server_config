@@ -1,4 +1,4 @@
-discslab-server1.cs.mcgill.ca
+discslab-server1
 
 [all:vars] 
 ansible_remote_tmp=/tmp/.ansible
